@@ -23,30 +23,22 @@ This is a Discord bot for managing a whitelist on a game server.
    cd kreiscraft-dc-bot
    ```
 
-2. **Configure the bot:** Create a `config.properties` file in
-   `src/main/resources` with the following content:
-
-   ```properties
-   bot.token=YOUR_BOT_TOKEN
-   guild.id=YOUR_GUILD_ID
-   whitelist.channel.id=YOUR_WHITELIST_CHANNEL_ID
-   whitelist.approvals.channel.id=YOUR_WHITELIST_APPROVALS_CHANNEL_ID
-   whitelist.api.url=http://your-server-api.com/whitelist
-   whitelisted.players.file=data/whitelisted.json
-   pending.players.file=data/pending.json
-   ```
-
-   - `bot.token`: Your Discord bot token.
-   - `guild.id`: The ID of your Discord server.
-   - `whitelist.channel.id`: The ID of the channel where users can request to be
+2. **Configure the bot (Environment Variables):** The bot is configured using
+   environment variables. The following variables are mandatory:
+   - `BOT_TOKEN`: Your Discord bot token.
+   - `GUILD_ID`: The ID of your Discord server.
+   - `WHITELIST_CHANNEL_ID`: The ID of the channel where users can request to be
      whitelisted.
-   - `whitelist.approvals.channel.id`: The ID of the channel where moderators
+   - `WHITELIST_APPROVALS_CHANNEL_ID`: The ID of the channel where moderators
      can approve or deny requests.
-   - `whitelist.api.url`: The URL of your game server's whitelist API.
-   - `whitelisted.players.file`: The path to the file where whitelisted players
-     are stored.
-   - `pending.players.file`: The path to the file where pending players are
-     stored.
+   - `WHITELIST_API_URL`: The URL of your game server's whitelist API.
+   - `MODERATOR_ROLE_ID`: The ID of the Discord role that identifies moderators.
+
+   The following variables have default values but can be overridden:
+   - `WHITELISTED_PLAYERS_FILE`: Path to the file where whitelisted players are
+     stored (default: `data/whitelisted.json`).
+   - `PENDING_PLAYERS_FILE`: Path to the file where pending players are stored
+     (default: `data/pending.json`).
 
 3. **Build the bot:**
 
@@ -70,7 +62,15 @@ consistent environment and that data is persisted across container restarts.
 2. **Run the Docker container:**
 
    ```bash
-   docker run -d -v $(pwd)/kreiscraft-dc-bot/data:/app/data --name kreiscraft-dc-bot kreiscraft-dc-bot
+   docker run -d \
+     -v $(pwd)/kreiscraft-dc-bot/data:/app/data \
+     -e BOT_TOKEN="YOUR_BOT_TOKEN" \
+     -e GUILD_ID="YOUR_GUILD_ID" \
+     -e WHITELIST_CHANNEL_ID="YOUR_WHITELIST_CHANNEL_ID" \
+     -e WHITELIST_APPROVALS_CHANNEL_ID="YOUR_WHITELIST_APPROVALS_CHANNEL_ID" \
+     -e WHITELIST_API_URL="http://your-server-api.com/whitelist" \
+     -e MODERATOR_ROLE_ID="YOUR_MODERATOR_ROLE_ID" \
+     --name kreiscraft-dc-bot kreiscraft-dc-bot
    ```
 
    This will run the bot in the background and mount the `data` directory on

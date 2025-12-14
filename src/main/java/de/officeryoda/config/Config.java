@@ -1,25 +1,29 @@
 package de.officeryoda.config;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 public class Config {
 
-    private static final Properties properties = new Properties();
-
-    static {
-        try (InputStream input = Config.class.getClassLoader().getResourceAsStream("config.properties")) {
-            if (input == null) {
-                System.out.println("Sorry, unable to find config.properties");
+    public static String get(String key) {
+        String value = System.getenv(key);
+        if (value == null || value.trim().isEmpty()) {
+            switch (key) {
+                case "WHITELISTED_PLAYERS_FILE":
+                    return "data/whitelisted.json";
+                case "PENDING_PLAYERS_FILE":
+                    return "data/pending.json";
+                default:
+                    throw new RuntimeException("Missing mandatory environment variable: " + key);
             }
-            properties.load(input);
-        } catch (IOException ex) {
-            ex.printStackTrace();
         }
+        return value;
     }
 
-    public static String get(String key) {
-        return properties.getProperty(key);
+    public static long getAsLong(String key) {
+        String value = get(key);
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException(
+                    "Invalid number format for environment variable: " + key + " with value: " + value, e);
+        }
     }
 }

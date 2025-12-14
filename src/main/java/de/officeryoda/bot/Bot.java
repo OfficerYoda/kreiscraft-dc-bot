@@ -34,12 +34,12 @@ public class Bot extends ListenerAdapter {
     }
 
     public void start() throws InterruptedException {
-        jda = JDABuilder.createDefault(Config.get("bot.token"))
+        jda = JDABuilder.createDefault(Config.get("BOT_TOKEN"))
                 .addEventListeners(this)
                 .build()
                 .awaitReady();
 
-        Guild guild = jda.getGuildById(Config.get("guild.id"));
+        Guild guild = jda.getGuildById(Config.getAsLong("GUILD_ID"));
         if (guild != null) {
             guild.upsertCommand("whitelist", "Add a player to the Kreiscraft whitelist")
                     .addOption(OptionType.STRING, "playername", "The name of the player to whitelist", true)
@@ -68,7 +68,7 @@ public class Bot extends ListenerAdapter {
     }
 
     private void handleWhitelistCommand(SlashCommandInteractionEvent event) {
-        if (!event.getChannel().getId().equals(Config.get("whitelist.channel.id"))) {
+        if (event.getChannel().getIdLong() != Config.getAsLong("WHITELIST_CHANNEL_ID")) {
             event.reply("This command can only be used in the whitelist channel.")
                     .setEphemeral(true)
                     .queue();
@@ -103,7 +103,8 @@ public class Bot extends ListenerAdapter {
                 .setEphemeral(true)
                 .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
 
-        TextChannel approvalChannel = event.getGuild().getTextChannelById(Config.get("whitelist.approvals.channel.id"));
+        TextChannel approvalChannel = event.getGuild()
+                .getTextChannelById(Config.getAsLong("WHITELIST_APPROVALS_CHANNEL_ID"));
         if (approvalChannel != null) {
             MessageEmbed approvalEmbed = new MessageEmbed(
                     null,
@@ -129,9 +130,9 @@ public class Bot extends ListenerAdapter {
     }
 
     private void handleRetryWhitelistCommand(SlashCommandInteractionEvent event) {
-        String moderatorRoleId = Config.get("moderator.role.id");
+        long moderatorRoleId = Config.getAsLong("MODERATOR_ROLE_ID");
         boolean isModerator = event.getMember().getRoles().stream()
-                .anyMatch(role -> role.getId().equals(moderatorRoleId));
+                .anyMatch(role -> role.getIdLong() == moderatorRoleId);
 
         if (!isModerator) {
             event.reply("You don't have the required role to execute this command.")
@@ -182,7 +183,7 @@ public class Bot extends ListenerAdapter {
     }
 
     private void updateWhitelistChannelEmbed(JDA jda) {
-        TextChannel whitelistChannel = jda.getTextChannelById(Config.get("whitelist.channel.id"));
+        TextChannel whitelistChannel = jda.getTextChannelById(Config.getAsLong("WHITELIST_CHANNEL_ID"));
         if (whitelistChannel != null) {
             whitelistChannel.getHistory().retrievePast(1).queue(messages -> {
                 MessageEmbed whitelistEmbed = new MessageEmbed(

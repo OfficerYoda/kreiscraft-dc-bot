@@ -18,8 +18,8 @@ import java.util.List;
 public class WhitelistService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final File whitelistedPlayersFile = new File(Config.get("whitelisted.players.file"));
-    private final File pendingPlayersFile = new File(Config.get("pending.players.file"));
+    private final File whitelistedPlayersFile = new File(Config.get("WHITELISTED_PLAYERS_FILE"));
+    private final File pendingPlayersFile = new File(Config.get("PENDING_PLAYERS_FILE"));
 
     public void addToWhitelist(WhitelistRequest request) {
         if (processWhitelistRequest(request)) {
@@ -50,7 +50,7 @@ public class WhitelistService {
     }
 
     private boolean processWhitelistRequest(WhitelistRequest request) {
-        String url = Config.get("whitelist.api.url");
+        String url = Config.get("WHITELIST_API_URL");
         String jsonBody = "{\"playerName\": \"" + request.playerName() + "\"}";
 
         HttpClient client = HttpClient.newHttpClient();
