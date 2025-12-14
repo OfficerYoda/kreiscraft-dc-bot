@@ -6,3 +6,8 @@ build
 kls_database.db
 
 config.properties
+bin/
+.classpath
+.project
+.project
+.project

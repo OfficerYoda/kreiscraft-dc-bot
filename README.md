@@ -70,7 +70,7 @@ consistent environment and that data is persisted across container restarts.
 2. **Run the Docker container:**
 
    ```bash
-   docker run -d -v $(pwd)/data:/app/data --name kreiscraft-dc-bot kreiscraft-dc-bot
+   docker run -d -v $(pwd)/kreiscraft-dc-bot/data:/app/data --name kreiscraft-dc-bot kreiscraft-dc-bot
    ```
 
    This will run the bot in the background and mount the `data` directory on

@@ -2,18 +2,17 @@ package de.officeryoda.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.kittinunf.fuel.Fuel;
-import com.github.kittinunf.fuel.core.FuelError;
-import com.github.kittinunf.fuel.core.Response;
-import com.github.kittinunf.result.Result;
 import de.officeryoda.config.Config;
 import de.officeryoda.dto.WhitelistRequest;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
-import kotlin.Triple;
 
 public class WhitelistService {
 
@@ -25,15 +24,23 @@ public class WhitelistService {
         String url = Config.get("whitelist.api.url");
         String jsonBody = "{\"playerName\": \"" + request.getPlayerName() + "\"}";
 
-        Triple<com.github.kittinunf.fuel.core.Request, Response, Result<String, FuelError>> result = Fuel.post(url)
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest httpRequest = HttpRequest.newBuilder()
+                .uri(URI.create(url))
                 .header("Content-Type", "application/json")
-                .body(jsonBody)
-                .responseString();
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
 
-        if (result.getThird() instanceof Result.Failure) {
+        try {
+            HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                addWhitelistedPlayer(request.getPlayerName());
+            } else {
+                addPendingPlayer(request);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
             addPendingPlayer(request);
-        } else {
-            addWhitelistedPlayer(request.getPlayerName());
         }
     }
 

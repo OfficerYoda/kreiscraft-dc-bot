@@ -6,7 +6,7 @@
  */
 
 plugins {
-    application
+    java
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -18,17 +18,13 @@ dependencies {
     // Discord API
     implementation("net.dv8tion:JDA:5.0.0-beta.22")
 
-    // HTTP Client
-    implementation("com.github.kittinunf.fuel:fuel:2.3.1")
-    implementation("com.github.kittinunf.fuel:fuel-jackson:2.3.1")
-
     // JSON Processing
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
 
     // Logging
     implementation("ch.qos.logback:logback-classic:1.5.6")
 
-    testImplementation(libs.junit.jupiter)
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -36,11 +32,6 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
-}
-
-application {
-    // Define the main class for the application.
-    mainClass = "de.officeryoda.bot.Bot"
 }
 
 tasks.named<Test>("test") {
@@ -51,4 +42,7 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     archiveBaseName.set("kreiscraft-dc-bot")
     archiveClassifier.set("")
     archiveVersion.set("")
+    manifest {
+        attributes["Main-Class"] = "de.officeryoda.bot.Bot"
+    }
 }
