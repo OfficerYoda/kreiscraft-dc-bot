@@ -12,6 +12,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class WhitelistService {
@@ -22,7 +23,7 @@ public class WhitelistService {
 
     public void addToWhitelist(WhitelistRequest request) {
         String url = Config.get("whitelist.api.url");
-        String jsonBody = "{\"playerName\": \"" + request.getPlayerName() + "\"}";
+        String jsonBody = "{\"playerName\": \"" + request.playerName() + "\"}";
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.newBuilder()
@@ -34,7 +35,7 @@ public class WhitelistService {
         try {
             HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                addWhitelistedPlayer(request.getPlayerName());
+                addWhitelistedPlayer(request.playerName());
             } else {
                 addPendingPlayer(request);
             }
@@ -49,7 +50,8 @@ public class WhitelistService {
             if (!whitelistedPlayersFile.exists()) {
                 return new ArrayList<>();
             }
-            return objectMapper.readValue(whitelistedPlayersFile, new TypeReference<>() {});
+            return objectMapper.readValue(whitelistedPlayersFile, new TypeReference<>() {
+            });
         } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
@@ -59,6 +61,7 @@ public class WhitelistService {
     private void addWhitelistedPlayer(String playerName) {
         List<String> players = getWhitelistedPlayers();
         players.add(playerName);
+        Collections.sort(players);
         savePlayers(whitelistedPlayersFile, players);
     }
 
@@ -73,7 +76,8 @@ public class WhitelistService {
             if (!pendingPlayersFile.exists()) {
                 return new ArrayList<>();
             }
-            return objectMapper.readValue(pendingPlayersFile, new TypeReference<>() {});
+            return objectMapper.readValue(pendingPlayersFile, new TypeReference<>() {
+            });
         } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
