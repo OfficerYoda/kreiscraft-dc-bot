@@ -35,8 +35,8 @@ jobs:
         with:
           images: ${{ env.DOCKER_IMAGE_NAME }}
           tags: |
-            type=sha,format=short,prefix=  # Tag with the short Git SHA (e.g., abcdefg)
-            type=raw,value=latest          # Tag with 'latest' (this will override the old one)
+            type=raw,value=build-${{ github.run_number }} # Tag with sequential build number (e.g., 105)
+            type=raw,value=latest                         # Tag with 'latest' (this will override the old one)
 
       # Build and push the Docker image
       - name: Build and Push Docker image
