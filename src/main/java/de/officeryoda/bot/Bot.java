@@ -45,12 +45,13 @@ public class Bot extends ListenerAdapter {
                     .addOption(OptionType.STRING, "playername", "The name of the player to whitelist", true)
                     .queue();
 
-            guild.upsertCommand("retry-whitelist", "Retry to whitelist all pending players")
+            guild.upsertCommand("sync-whitelist", "Sync the whitelist from the bot with the server")
                     .queue();
         }
 
         scheduler.scheduleAtFixedRate(() -> {
             whitelistService.retryPendingRequests();
+            whitelistService.syncWhitelistedPlayers();
             updateWhitelistChannelEmbed(jda);
         }, 0, 5, TimeUnit.MINUTES);
     }
@@ -61,7 +62,7 @@ public class Bot extends ListenerAdapter {
             case "whitelist":
                 handleWhitelistCommand(event);
                 break;
-            case "retry-whitelist":
+            case "sync-whitelist":
                 handleRetryWhitelistCommand(event);
                 break;
         }
@@ -143,7 +144,8 @@ public class Bot extends ListenerAdapter {
 
         event.deferReply(true).queue();
         whitelistService.retryPendingRequests();
-        updateWhitelistChannelEmbed(event.getJDA());
+        whitelistService.syncWhitelistedPlayers();
+        updateWhitelistChannelEmbed(jda);
         event.getHook().sendMessage("Retried whitelisting all pending players.")
                 .setEphemeral(true)
                 .queue(message -> message.delete().queueAfter(5, TimeUnit.SECONDS));
