@@ -84,7 +84,7 @@ public class Bot extends ListenerAdapter {
                 .map(WhitelistRequest::playerName)
                 .collect(Collectors.toSet());
         if (pendingPlayernames.contains(playerName)) {
-            event.reply("A request for player `" + playerName + "` is already pending approval.")
+            event.reply("A request for player `" + playerName + "` is already pending.")
                     .setEphemeral(true)
                     .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
             return;
@@ -140,7 +140,7 @@ public class Bot extends ListenerAdapter {
             return;
         }
 
-        event.deferReply().queue();
+        event.deferReply(true).queue();
         whitelistService.retryPendingRequests();
         updateWhitelistChannelEmbed(event.getJDA());
         event.getHook().sendMessage("Retried whitelisting all pending players.")
@@ -185,10 +185,6 @@ public class Bot extends ListenerAdapter {
         TextChannel whitelistChannel = jda.getTextChannelById(Config.get("whitelist.channel.id"));
         if (whitelistChannel != null) {
             whitelistChannel.getHistory().retrievePast(1).queue(messages -> {
-                if (!messages.isEmpty() && messages.get(0).getAuthor().isBot()) {
-                    messages.get(0).delete().queue();
-                }
-
                 MessageEmbed whitelistEmbed = new MessageEmbed(
                         null,
                         "Whitelisted Players",
@@ -203,7 +199,11 @@ public class Bot extends ListenerAdapter {
                         null,
                         null,
                         null);
-                whitelistChannel.sendMessageEmbeds(whitelistEmbed).queue();
+                if (!messages.isEmpty() && messages.get(0).getAuthor().isBot()) {
+                    messages.get(0).editMessageEmbeds(whitelistEmbed).queue();
+                } else {
+                    whitelistChannel.sendMessageEmbeds(whitelistEmbed).queue();
+                }
             });
         }
     }
