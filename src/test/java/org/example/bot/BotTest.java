@@ -1,4 +1,4 @@
-package org.example.bot;
+package de.officeryoda.bot;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

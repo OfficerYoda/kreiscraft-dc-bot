@@ -28,7 +28,6 @@ dependencies {
     // Logging
     implementation("ch.qos.logback:logback-classic:1.5.6")
 
-
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -41,7 +40,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "org.example.bot.Bot"
+    mainClass = "de.officeryoda.bot.Bot"
 }
 
 tasks.named<Test>("test") {

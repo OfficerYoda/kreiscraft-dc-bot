@@ -11,4 +11,3 @@ plugins {
 }
 
 rootProject.name = "kreiscraft-dc-bot"
-include("app")

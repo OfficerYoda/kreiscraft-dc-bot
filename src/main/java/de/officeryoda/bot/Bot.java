@@ -1,4 +1,4 @@
-package org.example.bot;
+package de.officeryoda.bot;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -10,9 +10,9 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import org.example.config.Config;
-import org.example.dto.WhitelistRequest;
-import org.example.service.WhitelistService;
+import de.officeryoda.config.Config;
+import de.officeryoda.dto.WhitelistRequest;
+import de.officeryoda.service.WhitelistService;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;

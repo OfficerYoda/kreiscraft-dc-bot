@@ -1,4 +1,4 @@
-package org.example.config;
+package de.officeryoda.config;
 
 import java.io.IOException;
 import java.io.InputStream;

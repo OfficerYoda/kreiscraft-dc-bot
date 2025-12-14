@@ -1,4 +1,4 @@
-package org.example.dto;
+package de.officeryoda.dto;
 
 public class WhitelistRequest {
     private final String userId;

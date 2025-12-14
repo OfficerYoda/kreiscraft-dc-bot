@@ -1,4 +1,4 @@
-package org.example.service;
+package de.officeryoda.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,8 +6,8 @@ import com.github.kittinunf.fuel.Fuel;
 import com.github.kittinunf.fuel.core.FuelError;
 import com.github.kittinunf.fuel.core.Response;
 import com.github.kittinunf.result.Result;
-import org.example.config.Config;
-import org.example.dto.WhitelistRequest;
+import de.officeryoda.config.Config;
+import de.officeryoda.dto.WhitelistRequest;
 
 import java.io.File;
 import java.io.IOException;

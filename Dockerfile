@@ -5,7 +5,7 @@ COPY . .
 RUN gradle shadowJar
 
 # Stage 2: Create the final image
-FROM openjdk:21-jre-slim
+FROM eclipse-temurin:21
 WORKDIR /app
 COPY --from=build /home/gradle/project/build/libs/kreiscraft-dc-bot.jar .
 RUN mkdir data
