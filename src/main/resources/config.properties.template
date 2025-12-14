@@ -1,0 +1,7 @@
+bot.token=YOUR_BOT_TOKEN
+guild.id=YOUR_GUILD_ID
+whitelist.channel.id=YOUR_WHITELIST_CHANNEL_ID
+whitelist.approvals.channel.id=YOUR_WHITELIST_APPROVALS_CHANNEL_ID
+whitelist.api.url=http://your-server-api.com/whitelist
+whitelisted.players.file=data/whitelisted.json
+pending.players.file=data/pending.json
