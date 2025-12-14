@@ -1,5 +1,8 @@
 package de.officeryoda.bot;
 
+import de.officeryoda.config.Config;
+import de.officeryoda.dto.WhitelistRequest;
+import de.officeryoda.service.WhitelistService;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -10,23 +13,29 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import de.officeryoda.config.Config;
-import de.officeryoda.dto.WhitelistRequest;
-import de.officeryoda.service.WhitelistService;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Bot extends ListenerAdapter {
 
     private final WhitelistService whitelistService = new WhitelistService();
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private JDA jda;
 
     public static void main(String[] args) throws InterruptedException {
-        JDA jda = JDABuilder.createDefault(Config.get("bot.token"))
-                .addEventListeners(new Bot())
+        Bot bot = new Bot();
+        bot.start();
+    }
+
+    public void start() throws InterruptedException {
+        jda = JDABuilder.createDefault(Config.get("bot.token"))
+                .addEventListeners(this)
                 .build()
                 .awaitReady();
 
@@ -35,15 +44,30 @@ public class Bot extends ListenerAdapter {
             guild.upsertCommand("whitelist", "Add a player to the Kreiscraft whitelist")
                     .addOption(OptionType.STRING, "playername", "The name of the player to whitelist", true)
                     .queue();
+
+            guild.upsertCommand("retry-whitelist", "Retry to whitelist all pending players")
+                    .queue();
         }
+
+        scheduler.scheduleAtFixedRate(() -> {
+            whitelistService.retryPendingRequests();
+            updateWhitelistChannelEmbed(jda);
+        }, 0, 5, TimeUnit.MINUTES);
     }
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (!event.getName().equals("whitelist")) {
-            return;
+        switch (event.getName()) {
+            case "whitelist":
+                handleWhitelistCommand(event);
+                break;
+            case "retry-whitelist":
+                handleRetryWhitelistCommand(event);
+                break;
         }
+    }
 
+    private void handleWhitelistCommand(SlashCommandInteractionEvent event) {
         if (!event.getChannel().getId().equals(Config.get("whitelist.channel.id"))) {
             event.reply("This command can only be used in the whitelist channel.")
                     .setEphemeral(true)
@@ -57,7 +81,7 @@ public class Bot extends ListenerAdapter {
         // Check if the playername is already pending
         Set<String> pendingPlayernames = whitelistService.getPendingPlayers()
                 .stream()
-                .map(it -> it.playerName())
+                .map(WhitelistRequest::playerName)
                 .collect(Collectors.toSet());
         if (pendingPlayernames.contains(playerName)) {
             event.reply("A request for player `" + playerName + "` is already pending approval.")
@@ -66,6 +90,7 @@ public class Bot extends ListenerAdapter {
             return;
         }
 
+        // Check if the playername is already whitelisted
         Set<String> whitelistedPlayernames = new HashSet<>(whitelistService.getWhitelistedPlayers());
         if (whitelistedPlayernames.contains(playerName)) {
             event.reply("Player `" + playerName + "` is already whitelisted.")
@@ -101,6 +126,26 @@ public class Bot extends ListenerAdapter {
                             Button.danger("deny:" + userId + ":" + playerName, "Deny"))
                     .queue();
         }
+    }
+
+    private void handleRetryWhitelistCommand(SlashCommandInteractionEvent event) {
+        String moderatorRoleId = Config.get("moderator.role.id");
+        boolean isModerator = event.getMember().getRoles().stream()
+                .anyMatch(role -> role.getId().equals(moderatorRoleId));
+
+        if (!isModerator) {
+            event.reply("You don't have the required role to execute this command.")
+                    .setEphemeral(true)
+                    .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
+            return;
+        }
+
+        event.deferReply().queue();
+        whitelistService.retryPendingRequests();
+        updateWhitelistChannelEmbed(event.getJDA());
+        event.getHook().sendMessage("Retried whitelisting all pending players.")
+                .setEphemeral(true)
+                .queue(message -> message.delete().queueAfter(5, TimeUnit.SECONDS));
     }
 
     @Override

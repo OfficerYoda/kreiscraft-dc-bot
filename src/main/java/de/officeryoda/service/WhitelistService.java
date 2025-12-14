@@ -22,6 +22,34 @@ public class WhitelistService {
     private final File pendingPlayersFile = new File(Config.get("pending.players.file"));
 
     public void addToWhitelist(WhitelistRequest request) {
+        if (processWhitelistRequest(request)) {
+            addWhitelistedPlayer(request.playerName());
+        } else {
+            addPendingPlayer(request);
+        }
+    }
+
+    public void retryPendingRequests() {
+        List<WhitelistRequest> pendingPlayers = getPendingPlayers();
+        if (pendingPlayers.isEmpty()) {
+            return;
+        }
+
+        List<WhitelistRequest> successfullyProcessed = new ArrayList<>();
+        for (WhitelistRequest request : pendingPlayers) {
+            if (processWhitelistRequest(request)) {
+                addWhitelistedPlayer(request.playerName());
+                successfullyProcessed.add(request);
+            }
+        }
+
+        if (!successfullyProcessed.isEmpty()) {
+            pendingPlayers.removeAll(successfullyProcessed);
+            savePlayers(pendingPlayersFile, pendingPlayers);
+        }
+    }
+
+    private boolean processWhitelistRequest(WhitelistRequest request) {
         String url = Config.get("whitelist.api.url");
         String jsonBody = "{\"playerName\": \"" + request.playerName() + "\"}";
 
@@ -34,14 +62,10 @@ public class WhitelistService {
 
         try {
             HttpResponse<String> response = client.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                addWhitelistedPlayer(request.playerName());
-            } else {
-                addPendingPlayer(request);
-            }
+            return response.statusCode() >= 200 && response.statusCode() < 300;
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-            addPendingPlayer(request);
+            return false;
         }
     }
 

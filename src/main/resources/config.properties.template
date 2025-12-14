@@ -5,3 +5,4 @@ whitelist.approvals.channel.id=YOUR_WHITELIST_APPROVALS_CHANNEL_ID
 whitelist.api.url=http://your-server-api.com/whitelist
 whitelisted.players.file=data/whitelisted.json
 pending.players.file=data/pending.json
+moderator.role.id=YOUR_MODERATOR_ROLE_ID
