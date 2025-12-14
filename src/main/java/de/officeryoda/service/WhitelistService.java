@@ -51,8 +51,13 @@ public class WhitelistService {
 
     private boolean processWhitelistRequest(WhitelistRequest request) {
         String url = Config.get("WHITELIST_API_URL");
-        String jsonBody = "{\"playerName\": \"" + request.playerName() + "\"}";
-
+        String jsonBody;
+        try {
+            jsonBody = new ObjectMapper().writeValueAsString(request);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            e.printStackTrace();
+            return false;
+        }
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(url))

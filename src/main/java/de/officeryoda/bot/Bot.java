@@ -160,7 +160,7 @@ public class Bot extends ListenerAdapter {
 
         switch (action) {
             case "approve":
-                whitelistService.addToWhitelist(new WhitelistRequest(userId, playerName));
+                whitelistService.addToWhitelist(new WhitelistRequest(playerName));
                 event.getJDA().retrieveUserById(userId).queue(user -> user.openPrivateChannel()
                         .queue(channel -> channel
                                 .sendMessage(
