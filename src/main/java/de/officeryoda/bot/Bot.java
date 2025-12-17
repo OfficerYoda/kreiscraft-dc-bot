@@ -69,13 +69,6 @@ public class Bot extends ListenerAdapter {
     }
 
     private void handleWhitelistCommand(SlashCommandInteractionEvent event) {
-        if (event.getChannel().getIdLong() != Config.getAsLong("WHITELIST_CHANNEL_ID")) {
-            event.reply("This command can only be used in the whitelist channel.")
-                    .setEphemeral(true)
-                    .queue();
-            return;
-        }
-
         String playerName = Objects.requireNonNull(event.getOption("playername")).getAsString();
         String userId = event.getUser().getId();
 
