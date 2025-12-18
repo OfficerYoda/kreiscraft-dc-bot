@@ -34,12 +34,6 @@ This is a Discord bot for managing a whitelist on a game server.
    - `WHITELIST_API_URL`: The URL of your game server's whitelist API.
    - `MODERATOR_ROLE_ID`: The ID of the Discord role that identifies moderators.
 
-   The following variables have default values but can be overridden:
-   - `WHITELISTED_PLAYERS_FILE`: Path to the file where whitelisted players are
-     stored (default: `data/whitelisted.json`).
-   - `PENDING_PLAYERS_FILE`: Path to the file where pending players are stored
-     (default: `data/pending.json`).
-
 3. **Build the bot:**
 
    ```bash
@@ -86,10 +80,3 @@ or higher installed.
 ```bash
 java -jar build/libs/kreiscraft-dc-bot.jar
 ```
-
-## Retry Mechanism
-
-If the whitelist API is unavailable, the bot will save the player name to a
-`pending.json` file. You will need to implement a mechanism to retry these
-pending requests at a later time. This could be a separate script that is run
-periodically, or you could add a command to the bot to trigger a retry.

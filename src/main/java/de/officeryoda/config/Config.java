@@ -7,9 +7,9 @@ public class Config {
         if (value == null || value.trim().isEmpty()) {
             switch (key) {
                 case "WHITELISTED_PLAYERS_FILE":
-                    return "data/whitelisted.json";
+                    return "/app/data/whitelisted.json";
                 case "PENDING_PLAYERS_FILE":
-                    return "data/pending.json";
+                    return "/app/data/pending.json";
                 default:
                     throw new RuntimeException("Missing mandatory environment variable: " + key);
             }
