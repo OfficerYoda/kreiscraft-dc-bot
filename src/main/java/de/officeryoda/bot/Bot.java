@@ -184,8 +184,7 @@ public class Bot extends ListenerAdapter {
                 MessageEmbed whitelistEmbed = new MessageEmbed(
                         null,
                         "Whitelisted Players",
-                        String.join("Use `/whitelist <minecraft-name>` to whitelist yourself\n\n",
-                                whitelistService.getWhitelistedPlayers()),
+                        String.join("\n", whitelistService.getWhitelistedPlayers()),
                         null,
                         null,
                         15844367,
