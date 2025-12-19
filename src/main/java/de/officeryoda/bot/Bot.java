@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 public class Bot extends ListenerAdapter {
 
     private final WhitelistService whitelistService = new WhitelistService();
+    private final Set<String> pendingApprovalPlayers = new HashSet<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private JDA jda;
 
@@ -73,11 +74,12 @@ public class Bot extends ListenerAdapter {
         String userId = event.getUser().getId();
 
         // Check if the playername is already pending
-        Set<String> pendingPlayernames = whitelistService.getPendingPlayers()
-                .stream()
-                .map(WhitelistRequest::playerName)
-                .collect(Collectors.toSet());
-        if (pendingPlayernames.contains(playerName)) {
+        boolean isPending = pendingApprovalPlayers.stream().anyMatch(p -> p.equalsIgnoreCase(playerName)) ||
+                whitelistService.getPendingPlayers().stream()
+                        .map(WhitelistRequest::playerName)
+                        .anyMatch(p -> p.equalsIgnoreCase(playerName));
+
+        if (isPending) {
             event.reply("A request for player `" + playerName + "` is already pending.")
                     .setEphemeral(true)
                     .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
@@ -85,13 +87,16 @@ public class Bot extends ListenerAdapter {
         }
 
         // Check if the playername is already whitelisted
-        Set<String> whitelistedPlayernames = new HashSet<>(whitelistService.getWhitelistedPlayers());
-        if (whitelistedPlayernames.contains(playerName)) {
+        boolean isWhitelisted = whitelistService.getWhitelistedPlayers().stream()
+                .anyMatch(p -> p.equalsIgnoreCase(playerName));
+        if (isWhitelisted) {
             event.reply("Player `" + playerName + "` is already whitelisted.")
                     .setEphemeral(true)
                     .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
             return;
         }
+
+        pendingApprovalPlayers.add(playerName);
 
         event.reply("Your request to whitelist player `" + playerName + "` has been submitted for approval.")
                 .setEphemeral(true)
@@ -155,6 +160,7 @@ public class Bot extends ListenerAdapter {
 
         switch (action) {
             case "approve":
+                pendingApprovalPlayers.removeIf(p -> p.equalsIgnoreCase(playerName));
                 whitelistService.addToWhitelist(new WhitelistRequest(playerName));
                 event.getJDA().retrieveUserById(userId).queue(user -> user.openPrivateChannel()
                         .queue(channel -> channel
@@ -166,6 +172,7 @@ public class Bot extends ListenerAdapter {
                 updateWhitelistChannelEmbed(event.getJDA());
                 break;
             case "deny":
+                pendingApprovalPlayers.removeIf(p -> p.equalsIgnoreCase(playerName));
                 event.getJDA().retrieveUserById(userId).queue(user -> user.openPrivateChannel().queue(channel -> channel
                         .sendMessage("Your whitelist request for player `" + playerName + "` has been **denied**.")
                         .queue()));
