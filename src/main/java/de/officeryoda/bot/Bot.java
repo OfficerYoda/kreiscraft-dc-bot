@@ -79,12 +79,12 @@ public class Bot extends ListenerAdapter {
                         .map(WhitelistRequest::playerName)
                         .anyMatch(p -> p.equalsIgnoreCase(playerName));
 
-        if (isPending) {
-            event.reply("A request for player `" + playerName + "` is already pending.")
-                    .setEphemeral(true)
-                    .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
-            return;
-        }
+        // if (isPending) {
+        // event.reply("A request for player `" + playerName + "` is already pending.")
+        // .setEphemeral(true)
+        // .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
+        // return;
+        // }
 
         // Check if the playername is already whitelisted
         boolean isWhitelisted = whitelistService.getWhitelistedPlayers().stream()
@@ -96,36 +96,43 @@ public class Bot extends ListenerAdapter {
             return;
         }
 
-        pendingApprovalPlayers.add(playerName);
-
-        event.reply("Your request to whitelist player `" + playerName + "` has been submitted for approval.")
+        whitelistService.addToWhitelist(new WhitelistRequest(playerName));
+        event.reply("Player `" + playerName + "` has been added to the whitelist.")
                 .setEphemeral(true)
                 .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
 
-        TextChannel approvalChannel = event.getGuild()
-                .getTextChannelById(Config.getAsLong("WHITELIST_APPROVALS_CHANNEL_ID"));
-        if (approvalChannel != null) {
-            MessageEmbed approvalEmbed = new MessageEmbed(
-                    null,
-                    "Whitelist Request: " + playerName,
-                    "User: " + event.getUser().getAsMention() + "\nPlayer Name: `" + playerName + "`",
-                    null,
-                    null,
-                    15158332,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null);
+        // pendingApprovalPlayers.add(playerName);
 
-            approvalChannel.sendMessageEmbeds(approvalEmbed)
-                    .setActionRow(
-                            Button.success("approve:" + userId + ":" + playerName, "Approve"),
-                            Button.danger("deny:" + userId + ":" + playerName, "Deny"))
-                    .queue();
-        }
+        // event.reply("Your request to whitelist player `" + playerName + "` has been
+        // submitted for approval.")
+        // .setEphemeral(true)
+        // .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
+
+        // TextChannel approvalChannel = event.getGuild()
+        // .getTextChannelById(Config.getAsLong("WHITELIST_APPROVALS_CHANNEL_ID"));
+        // if (approvalChannel != null) {
+        // MessageEmbed approvalEmbed = new MessageEmbed(
+        // null,
+        // "Whitelist Request: " + playerName,
+        // "User: " + event.getUser().getAsMention() + "\nPlayer Name: `" + playerName +
+        // "`",
+        // null,
+        // null,
+        // 15158332,
+        // null,
+        // null,
+        // null,
+        // null,
+        // null,
+        // null,
+        // null);
+        //
+        // approvalChannel.sendMessageEmbeds(approvalEmbed)
+        // .setActionRow(
+        // Button.success("approve:" + userId + ":" + playerName, "Approve"),
+        // Button.danger("deny:" + userId + ":" + playerName, "Deny"))
+        // .queue();
+        // }
     }
 
     private void handleRetryWhitelistCommand(SlashCommandInteractionEvent event) {
